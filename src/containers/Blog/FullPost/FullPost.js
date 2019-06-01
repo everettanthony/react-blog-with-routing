@@ -1,34 +1,45 @@
 import React, { Component } from 'react';
 import styles from './FullPost.module.scss';
 // import axios from 'axios';
-import axios from '../../axios';
+import axios from '../../../axios';
 
 class FullPost extends Component {
     state = {
         loadedPost: null
     };
 
+    componentDidMount () {
+        console.log(this.props);
+        this.loadData();
+    }
+
     componentDidUpdate() {
-        if (this.props.id) {
-            if (!this.state.loadedPost || (this.state.loadedPost && this.state.loadedPost.id !== this.props.id)) {
-                axios.get('/posts/' + this.props.id).then(rsp => {
-                    this.setState({ loadedPost: rsp.data });
-                }).catch(error => {
-                    // console.log(error);
-                    this.setState({error: true});
-                });
+        this.loadData();
+    }
+
+    loadData () {
+        if ( this.props.match.params.id ) {
+            if ( !this.state.loadedPost || (this.state.loadedPost && this.state.loadedPost.id !== +this.props.match.params.id) ) {
+                axios.get( '/posts/' + this.props.match.params.id )
+                    .then( response => {
+                        // console.log(response);
+                        this.setState( { loadedPost: response.data } );
+                    } );
             }
-         }
+        }
     }
 
     deleteBlog = () => {
-        axios.delete('/posts/' + this.props.id).then(rsp => {
+        axios.delete('/posts/' + this.props.match.params.id).then(rsp => {
             console.log('Deleted: ', rsp);
         });
     }
 
     render () {
-        let post = this.props.id ? <p className={styles.Message}>Loading...</p> : <p className={styles.Message}>Please select a Post!</p>;
+        let post = <p style={{ textAlign: 'center' }}>Please select a Post!</p>;
+        if ( this.props.match.params.id ) {
+            post = <p style={{ textAlign: 'center' }}>Loading...</p>;
+        }
 
         if (this.state.loadedPost) {
             post = (

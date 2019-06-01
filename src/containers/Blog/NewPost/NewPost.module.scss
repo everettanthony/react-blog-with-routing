@@ -1,23 +1,16 @@
 .NewPost {
     background: #6b1960;
     color: #fff;
-    left: 0;
+    display: flex;
+    justify-content: center;
     margin: 0;
-    padding: 30px;
-    position: absolute;
-    top: 0;
-    transition: transform 200ms ease-in-out;
-  //  transform: translateX(-662px);
-    width: 600px;
-    z-index: 999;
+    padding: 30px 0;
+    position: relative;
+    width: 100%;
+}
 
-    &.Open {
-        transform: translateX(0);
-    }
-    
-    &.Close {
-        transform: translateX(-100%);
-    }
+.Container {
+    width: 750px;
 }
 
 .NewPost label {

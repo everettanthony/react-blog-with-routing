@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import styles from './NewPost.module.scss';
 // import axios from 'axios';
-import axios from '../../axios';
-import Overlay from '../UI/Overlay/Overlay';
+import axios from '../../../axios';
 
 const postsUrl = 'https://jsonplaceholder.typicode.com/posts';
 
@@ -10,7 +9,12 @@ class NewPost extends Component {
     state = {
         title: '',
         content: '',
-        author: 'Max'
+        author: 'Max',
+        submitted: false
+    }
+
+    componentDidMount() {
+        console.log('NEW: ', this.props);
     }
 
     savePost = () => {
@@ -22,23 +26,17 @@ class NewPost extends Component {
 
         axios.post(postsUrl, data).then( rsp => {
             console.log( rsp.data );
+            this.props.history.replace('/posts');
         }).catch(error => {
             // console.log(error);
             this.setState({error: true});
         });
     }
 
-    render (props) {
-        let classes = [styles.NewPost, styles.Close];
-
-        if (this.props.open) {
-            classes = [styles.NewPost, styles.Open];
-        }
-
+    render () {
         return (
-            <div>
-                <div className={classes.join(' ')}>
-                    <i className={['material-icons', styles.iconClose].join(' ')} onClick={this.props.closed}>clear</i>
+            <div className={styles.NewPost}>
+                <div className={styles.Container}>              
                     <div className={styles.NewPostTitle}>New Blog</div>
                     <div className={styles.PostFormRow}>
                         <label>Title</label>
@@ -62,8 +60,7 @@ class NewPost extends Component {
                     <div className={styles.PostFormRow}>
                         <button onClick={this.savePost}>Post Blog</button>
                     </div>
-                </div>
-                <Overlay show={this.props.open} clicked={this.props.closed} />
+                </div> 
             </div>
         );
     }

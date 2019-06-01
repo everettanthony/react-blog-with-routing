@@ -1,94 +1,58 @@
 import React, { Component } from 'react';
+import { Route, NavLink, Switch, Redirect} from 'react-router-dom';
 import styles from './Blog.module.scss';
-// import axios from 'axios';
-import axios from '../../axios';
+import Posts from './Posts/Posts';
+import About from '../../components/Pages/About/About';
+import Login from '../../components/Pages/Login/Login';
+import asyncComponent from '../../hoc/asyncComponent';
 
-import Post from '../../components/Post/Post';
-import FullPost from '../../components/FullPost/FullPost';
-import NewPost from '../../components/NewPost/NewPost';
+const AsyncNewPost = asyncComponent(() => {
+    return import('./NewPost/NewPost');
+});
 
 class Blog extends Component {
     state = {
-        posts: [],
-        selectedPostId: null,
-        error: false,
-        postFormOpen: false
-    };
-
-    componentDidMount() {
-        axios.get('/posts/').then(rsp => {
-            const posts = rsp.data.slice(0, 12);
-
-            const updatedPosts = posts.map(post => {
-                return {
-                    ...post,
-                    author: 'Tony Bradshaw'
-                }
-            });
-
-            this.setState({ posts: updatedPosts });
-        }).catch(error => {
-            // console.log(error);
-            this.setState({error: true});
-        });
+        auth: false 
     }
 
-    getBlockDetails = (id) => {
-        this.setState({ selectedPostId: id });
-    }
-
-    postFormClose = () => {
-        this.setState({ postFormOpen: false });
-    }
-
-    postFormToggle = (evt) => {
+    loginUser = (evt) => {
+        let loginStatus = this.state.auth;
         evt.preventDefault();
-
-        this.setState( ( prevState ) => {
-            return { postFormOpen: !prevState.postFormOpen };
-        } );
+        this.setState({ auth: !loginStatus });
     }
 
     render() {
-        let posts = <p style={{textAlign: 'center'}}>Something went wrong!</p>;
-
-        if (!this.state.error) {
-            posts = this.state.posts.map(post => {
-                return <Post 
-                    key={post.id} 
-                    title={post.title} 
-                    author={post.author} 
-                    body={post.body} 
-                    clicked={() => this.getBlockDetails(post.id)} />;
-            });
-        }
+        const activeClass = {
+            background: '#f3f3f3',
+            color: '#f7218c'
+        };
 
         return (
             <div className={styles.Blog}>
                 <header className={styles.Header}>
                     <nav className={styles.Nav}>
                         <ul>
-                            <li><a href="/">Home</a></li>
-                            <li><a href="/" onClick={this.postFormToggle}>New Blog</a></li>
-                        </ul>
+                            <li><NavLink to="/posts" exact>Home</NavLink></li>
+                            <li><NavLink to="/about" activeStyle={activeClass}>About</NavLink></li>
+                            <li><NavLink to="/new-post" activeStyle={activeClass}>New Blog</NavLink></li>
+                            <li><NavLink to="/login" activeStyle={activeClass}>Login</NavLink></li>
+                         </ul>
                     </nav>
                 </header>
                 <div className={styles.Main}>
-                    <div className={styles.Column}>
-                        <section className={styles.Posts}>
-                            {posts}
-                        </section>
-                    </div>
-                    <div className={styles.Column}>
-                        <section>
-                            <FullPost id={this.state.selectedPostId} />
-                        </section>
+                    <div className={styles.Row}>
+                        <Switch>
+                            {this.state.auth ? <Route path="/new-post" component={AsyncNewPost} /> : null}
+                            <Route path="/about" component={About} />
+                            <Route path="/posts" component={Posts} />
+                            <Route path="/login" component={Login} />
+                            {/* <Route render={() => <h1>Blog Not found</h1>}/> */}
+                            <Redirect from="/new-post" to="/login" />
+                            <Redirect from="/" to="/posts" />
+                            {/* <Route path="/" component={Posts} /> */}
+                        </Switch>
                     </div>
                 </div>
-                <section>
-                    <NewPost open={this.state.postFormOpen} 
-                        closed={this.postFormClose} />
-                </section>
             </div>
         );
     }
